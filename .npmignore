@@ -1,0 +1,38 @@
+# Source files (we ship compiled dist/)
+src/
+
+# Development files
+tsconfig.json
+.env
+.env.example
+
+# Documentation (keep README.md)
+IMPLEMENTATION_PLAN.md
+PRD_SYNC_DOCS.md
+CLAUDE.md
+CONTRIBUTING.md
+
+# Git
+.git/
+.gitignore
+
+# Output
+output/
+
+# Node
+node_modules/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Test files
+test/
+*.test.ts
+*.spec.ts

@@ -24,3 +24,10 @@ output/*.md
 # Logs
 *.log
 npm-debug.log*
+
+# Test directories
+.claude/
+examples/*/.claude/
+
+# npm pack
+*.tgz
