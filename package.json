@@ -21,15 +21,16 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
+    "@upstash/context7-sdk": "^0.1.0",
     "commander": "^12.0.0",
-    "prompts": "^2.4.2",
-    "dotenv": "^16.4.0"
+    "dotenv": "^16.4.0",
+    "prompts": "^2.4.2"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",
     "@types/prompts": "^2.4.9",
-    "typescript": "^5.6.0",
-    "tsx": "^4.7.0"
+    "tsx": "^4.7.0",
+    "typescript": "^5.6.0"
   },
   "engines": {
     "node": ">=22.0.0"
