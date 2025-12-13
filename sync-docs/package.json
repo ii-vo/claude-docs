@@ -1,0 +1,43 @@
+{
+  "name": "sync-docs",
+  "version": "1.0.0",
+  "description": "Claude Code research workflow tool that auto-configures library-specific sub-agents via Context7",
+  "type": "module",
+  "bin": {
+    "sync-docs": "./bin/cli.js"
+  },
+  "files": [
+    "bin/",
+    "templates/",
+    "dist/"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsx src/index.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": [
+    "claude-code",
+    "documentation",
+    "research",
+    "context7",
+    "ai-agents"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "commander": "^12.0.0",
+    "prompts": "^2.4.2",
+    "dotenv": "^16.3.1",
+    "@upstash/context7-sdk": "^0.1.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.0",
+    "tsx": "^4.7.0",
+    "@types/node": "^22.0.0",
+    "@types/prompts": "^2.4.9"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
