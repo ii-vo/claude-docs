@@ -22,11 +22,29 @@ claude /sync-docs
 1. **Configures** Context7 MCP server automatically
 2. **Installs** slash commands (`/sync-docs`, `/research`)
 3. **Creates** base research agents for codebase exploration
+4. **Installs** a library-research skill for auto-routing
 
 Then `claude /sync-docs`:
 - Scans `package.json` / `requirements.txt` for dependencies
 - Validates each library against Context7
 - Generates `@research-{library}` agents with Context7 patterns
+
+## How Routing Works
+
+```
+Question mentions a library?
+├─► YES: Use @research-{library}
+│        └─► No agent? Check Context7, suggest /sync-docs
+└─► NO:  Use @codebase-locator first
+         └─► Found libraries? Route to their agents
+         └─► No libraries? Use codebase agents or web search
+```
+
+**Priority order:**
+1. Library-specific agents (`@research-react`, etc.)
+2. Context7 direct query
+3. Codebase agents (`@codebase-locator`, `@codebase-analyzer`)
+4. Web search (fallback for topics not in Context7)
 
 ## Installation
 
@@ -42,6 +60,7 @@ This creates:
 - `.mcp.json` - Context7 MCP server configuration
 - `.claude/commands/` - `/sync-docs` and `/research` commands
 - `.claude/agents/` - Base research agents
+- `.claude/skills/` - Library research skill (auto-triggers for library questions)
 
 ## Usage
 
@@ -68,6 +87,12 @@ This scans your dependencies and creates agents like:
 **Via router:**
 ```
 /research stripe webhook signature verification
+```
+
+**Auto-routing (just ask):**
+```
+How do React hooks work?
+→ System auto-routes to @research-react
 ```
 
 ### Base Agents
@@ -100,6 +125,7 @@ Options:
 - Runs `claude mcp add` to configure Context7 MCP server
 - Creates `.claude/commands/sync-docs.md` and `research.md`
 - Creates base agent templates in `.claude/agents/`
+- Creates library-research skill in `.claude/skills/`
 
 ### Step 2: `claude /sync-docs`
 
@@ -107,6 +133,7 @@ Options:
 - Queries Context7 to validate each library
 - Creates `@research-{library}` agents with Context7 search patterns
 - Updates `/research` router with agent list
+- Updates skill with agent mappings
 
 ## Context7 API Key
 
