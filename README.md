@@ -1,6 +1,11 @@
 # claude-docs
 
-Claude Code research workflow tool that auto-configures library-specific sub-agents via Context7.
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![npm version](https://badge.fury.io/js/claude-docs.svg)](https://www.npmjs.com/package/claude-docs)
+
+Claude Code research workflow tool that auto-configures library-specific sub-agents via [Context7](https://context7.com).
+
+**Requirements:** [Claude Code](https://claude.ai/code) CLI installed (`npm install -g @anthropic-ai/claude-code`)
 
 ## Quick Start
 

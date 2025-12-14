@@ -1,29 +1,41 @@
 {
-  "name": "context7-docs-tool",
-  "version": "0.1.0",
-  "description": "CLI tool for Context7 documentation workflow automation",
-  "main": "dist/index.js",
+  "name": "claude-docs",
+  "version": "1.0.3",
+  "description": "Claude Code research workflow tool that auto-configures library-specific sub-agents via Context7",
   "type": "module",
-  "scripts": {
-    "dev": "tsx src/index.ts",
-    "build": "tsc",
-    "start": "node dist/index.js",
-    "search": "tsx src/index.ts search",
-    "get-docs": "tsx src/index.ts get-docs",
-    "typecheck": "tsc --noEmit"
+  "bin": {
+    "claude-docs": "dist/index.js"
   },
+  "files": [
+    "templates/",
+    "dist/"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsx src/index.ts",
+    "typecheck": "tsc --noEmit",
+    "prepublishOnly": "npm run build"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ii-vo/claude-docs.git"
+  },
+  "bugs": {
+    "url": "https://github.com/ii-vo/claude-docs/issues"
+  },
+  "homepage": "https://github.com/ii-vo/claude-docs#readme",
   "keywords": [
+    "claude",
+    "claude-code",
     "context7",
     "documentation",
-    "cli",
-    "workflow"
+    "ai-agents",
+    "mcp"
   ],
-  "author": "",ii-vo
+  "author": "ii-vo",
   "license": "MIT",
   "dependencies": {
-    "@upstash/context7-sdk": "^0.1.0",
     "commander": "^12.0.0",
-    "dotenv": "^16.4.0",
     "prompts": "^2.4.2"
   },
   "devDependencies": {
@@ -32,18 +44,7 @@
     "tsx": "^4.7.0",
     "typescript": "^5.6.0"
   },
-    "repository": {
-    "type": "git",
-    "url": "https://github.com/ii-vo/claude-docs.git"
-  },
-  "bugs": {
-    "url": "https://github.com/ii-vo/claude-docs/issues"
-  },
-  "homepage": "https://github.com/ii-vo/claude-docs#readme",
-  "bin": {
-    "claude-docs": "./dist/index.js"
-  },
   "engines": {
-    "node": ">=22.0.0"
+    "node": ">=18.0.0"
   }
 }

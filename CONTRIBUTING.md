@@ -5,17 +5,10 @@ Thank you for your interest in contributing!
 ## Development Setup
 
 ```bash
-# Clone the repository
-git clone https://github.com/your-org/claude-docs.git
-cd claude-docs/sync-docs
-
-# Install dependencies
+git clone https://github.com/upstash/claude-docs.git
+cd claude-docs
 npm install
-
-# Build
 npm run build
-
-# Link for local testing
 npm link
 
 # Test in a project
@@ -27,24 +20,22 @@ claude-docs --skip-mcp
 
 ```
 claude-docs/
-├── sync-docs/                   # Main package (npm: claude-docs)
-│   ├── dist/index.js            # Compiled CLI entry point
-│   ├── src/index.ts             # CLI source
-│   ├── templates/
-│   │   ├── commands/
-│   │   │   ├── sync-docs.md     # /sync-docs slash command
-│   │   │   └── research.md      # /research router
-│   │   └── agents/
-│   │       ├── codebase-locator.md
-│   │       ├── codebase-analyzer.md
-│   │       ├── codebase-pattern-finder.md
-│   │       ├── web-search-researcher.md
-│   │       └── research-library.md.hbs
-│   ├── package.json
-│   └── tsconfig.json
-├── PRD_SYNC_DOCS.md             # Product requirements
-├── IMPLEMENTATION_PLAN.md       # Implementation checklist
-└── CLAUDE.md                    # Claude Code instructions
+├── src/index.ts             # CLI source
+├── dist/index.js            # Compiled CLI (has shebang)
+├── templates/
+│   ├── commands/
+│   │   ├── sync-docs.md     # /sync-docs slash command
+│   │   └── research.md      # /research router
+│   └── agents/
+│       ├── codebase-locator.md
+│       ├── codebase-analyzer.md
+│       ├── codebase-pattern-finder.md
+│       ├── web-search-researcher.md
+│       └── research-library.md.hbs
+├── package.json
+├── tsconfig.json
+├── README.md
+└── docs/                    # Planning documents
 ```
 
 ## How to Contribute
@@ -90,7 +81,6 @@ Currently supports `package.json` and `requirements.txt`. To add new manifest ty
 
 - TypeScript with strict mode
 - ES2022 target, ESNext modules
-- No semicolons (optional, just be consistent)
 - Clear, descriptive variable names
 
 ## Pull Request Guidelines

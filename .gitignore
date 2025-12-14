@@ -4,8 +4,9 @@ node_modules/
 # Build output
 dist/
 
-# Environment variables
+# Environment
 .env
+.env.local
 
 # IDE
 .vscode/
@@ -17,10 +18,9 @@ dist/
 .DS_Store
 Thumbs.db
 
-# Output files
-output/*.md
-!output/.gitkeep
-
 # Logs
 *.log
 npm-debug.log*
+
+# Generated during testing
+.claude/
