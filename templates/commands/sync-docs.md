@@ -230,7 +230,42 @@ Read `.claude/commands/research.md` and update the agent list between the marker
 <!-- AGENT_LIST_END -->
 ```
 
-### Step 7: Final Summary
+### Step 7: Update CLAUDE.md or AGENTS.md
+
+If `CLAUDE.md` or `AGENTS.md` exists in the project root, update the library agents list.
+
+1. Look for existing section between markers:
+   ```markdown
+   <!-- CLAUDE_DOCS_AGENTS_START -->
+   ...
+   <!-- CLAUDE_DOCS_AGENTS_END -->
+   ```
+
+2. If markers exist, replace content between them. If not, append after the `<!-- CLAUDE_DOCS_END -->` marker (if present) or at the end of the documentation section.
+
+3. Generate the agents list:
+   ```markdown
+   <!-- CLAUDE_DOCS_AGENTS_START -->
+   ### Configured Library Agents
+
+   The following library-specific research agents are available:
+
+   | Agent | Library | Context7 ID |
+   |-------|---------|-------------|
+   | `@research-react` | React | `/facebook/react` |
+   | `@research-next` | Next.js | `/vercel/next.js` |
+   | `@research-stripe` | Stripe | `/stripe/stripe-node` |
+
+   Use these agents directly with `@research-<library>` or via the `/research` router.
+   <!-- CLAUDE_DOCS_AGENTS_END -->
+   ```
+
+**Output:**
+```
+✓ Updated CLAUDE.md with 3 library agents
+```
+
+### Step 8: Final Summary
 
 ```
 Sync complete!

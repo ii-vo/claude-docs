@@ -24,6 +24,89 @@ function ensureDir(dirPath: string): void {
   }
 }
 
+// Markers for the documentation section in CLAUDE.md/AGENTS.md
+const DOCS_SECTION_START = '<!-- CLAUDE_DOCS_START -->';
+const DOCS_SECTION_END = '<!-- CLAUDE_DOCS_END -->';
+
+function generateDocsSection(): string {
+  return `${DOCS_SECTION_START}
+## Library Documentation via Context7
+
+This project uses [Context7](https://context7.com) MCP server for up-to-date library documentation lookup. The documentation system is configured automatically and provides specialized research agents for your project's dependencies.
+
+### How to Use
+
+1. **Run \`/sync-docs\`** to scan dependencies and generate library-specific research agents
+2. **Use \`/research <topic>\`** to route questions to the appropriate documentation agent
+3. **Use \`@research-<library>\`** to directly query a specific library's documentation
+
+### Available Commands
+
+| Command | Description |
+|---------|-------------|
+| \`/sync-docs\` | Scan dependencies and create/update library research agents |
+| \`/research <query>\` | Route questions to appropriate documentation agents |
+
+### Context7 MCP Tools
+
+The Context7 MCP server provides these tools:
+
+| Tool | Purpose |
+|------|---------|
+| \`resolve-library-id\` | Convert package name to Context7 library ID |
+| \`get-library-docs\` | Retrieve documentation for a library |
+
+### Notes
+
+- Documentation agents are generated in \`.claude/agents/research-<library>.md\`
+- Run \`/sync-docs\` after adding new dependencies to create their research agents
+- If a library is not available in Context7, it will be skipped during sync
+${DOCS_SECTION_END}`;
+}
+
+function findDocumentationFile(): string | null {
+  const cwd = process.cwd();
+  const candidates = ['CLAUDE.md', 'AGENTS.md'];
+
+  for (const candidate of candidates) {
+    const filePath = path.join(cwd, candidate);
+    if (fs.existsSync(filePath)) {
+      return filePath;
+    }
+  }
+  return null;
+}
+
+function updateDocumentationFile(filePath: string): { updated: boolean; created: boolean; error?: string } {
+  try {
+    const content = fs.readFileSync(filePath, 'utf-8');
+    const docsSection = generateDocsSection();
+
+    // Check if section already exists
+    const startIdx = content.indexOf(DOCS_SECTION_START);
+    const endIdx = content.indexOf(DOCS_SECTION_END);
+
+    let newContent: string;
+
+    if (startIdx !== -1 && endIdx !== -1) {
+      // Replace existing section
+      newContent = content.substring(0, startIdx) + docsSection + content.substring(endIdx + DOCS_SECTION_END.length);
+    } else {
+      // Append section at the end
+      newContent = content.trimEnd() + '\n\n' + docsSection + '\n';
+    }
+
+    fs.writeFileSync(filePath, newContent, 'utf-8');
+    return { updated: true, created: false };
+  } catch (error) {
+    return {
+      updated: false,
+      created: false,
+      error: error instanceof Error ? error.message : String(error)
+    };
+  }
+}
+
 function copyFile(src: string, dest: string): void {
   const content = fs.readFileSync(src, 'utf-8');
   fs.writeFileSync(dest, content, 'utf-8');
@@ -145,6 +228,18 @@ async function scaffold(options: ScaffoldOptions): Promise<void> {
       console.log(`[ok] Created ${path.relative(process.cwd(), dest)}`);
     } else {
       console.error(`[error] Template not found: ${template}`);
+    }
+  }
+
+  // Update CLAUDE.md or AGENTS.md if present
+  const docFile = findDocumentationFile();
+  if (docFile) {
+    const result = updateDocumentationFile(docFile);
+    const fileName = path.basename(docFile);
+    if (result.updated) {
+      console.log(`[ok] Updated ${fileName} with documentation section`);
+    } else if (result.error) {
+      console.log(`[warn] Could not update ${fileName}: ${result.error}`);
     }
   }
 
