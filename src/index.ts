@@ -30,6 +30,8 @@ function copyFile(src: string, dest: string): void {
 }
 
 async function promptForApiKey(): Promise<string | null> {
+  console.log('Get your API key at: https://context7.com/dashboard\n');
+
   const response = await prompts({
     type: 'password',
     name: 'apiKey',
