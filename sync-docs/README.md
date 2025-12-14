@@ -1,35 +1,32 @@
-# sync-docs
+# claude-docs
 
 Claude Code research workflow tool that auto-configures library-specific sub-agents via Context7.
 
 ## Quick Start
 
 ```bash
-# 1. Scaffold Claude Code configuration
-npx sync-docs
+# 1. Run setup (auto-configures Context7 MCP)
+npx claude-docs
 
 # 2. In Claude Code, generate library agents
 /sync-docs
 
-# 3. Use library-specific research
+# 3. Research any library
 @research-react "explain useState hooks"
-/research stripe webhook verification
 ```
 
 ## What It Does
 
-`sync-docs` automatically creates specialized AI research agents for every library in your project:
+`claude-docs` sets up your project for AI-powered documentation research:
 
-1. **Scans** your `package.json` and `requirements.txt` for dependencies
-2. **Validates** each library against Context7's documentation index
-3. **Generates** library-specific agents with correct Context7 search patterns
-4. **Provides** both direct invocation (`@research-react`) and router (`/research`) patterns
+1. **Configures** Context7 MCP server automatically
+2. **Installs** slash commands (`/sync-docs`, `/research`)
+3. **Creates** base research agents for codebase exploration
 
-## Prerequisites
-
-- [Claude Code](https://claude.ai/code) CLI installed
-- (Optional) [Context7 MCP server](https://github.com/upstash/context7) configured for library validation
-- (Optional) `CONTEXT7_API_KEY` in `.env` for higher rate limits
+Then `/sync-docs` in Claude Code:
+- Scans `package.json` / `requirements.txt` for dependencies
+- Validates each library against Context7
+- Generates `@research-{library}` agents with Context7 patterns
 
 ## Installation
 
@@ -37,18 +34,21 @@ npx sync-docs
 
 ```bash
 cd your-project
-npx sync-docs
+npx claude-docs
 ```
 
-Creates `.claude/` directory in your project with:
-- `/sync-docs` - Generate library agents from dependencies
-- `/research` - Route documentation queries to specialists
-- Base agents for codebase research
+You'll be prompted for a Context7 API key (optional, increases rate limits).
+Get one free at **[context7.com/dashboard](https://context7.com/dashboard)**.
+
+This creates:
+- `.mcp.json` - Context7 MCP server configuration
+- `.claude/commands/` - `/sync-docs` and `/research` commands
+- `.claude/agents/` - Base research agents
 
 ### Global installation
 
 ```bash
-npx sync-docs --global
+npx claude-docs --global
 ```
 
 Installs to `~/.claude/` for use across all projects.
@@ -57,7 +57,7 @@ Installs to `~/.claude/` for use across all projects.
 
 ### Generate Library Agents
 
-After scaffolding, run in Claude Code:
+After setup, run in Claude Code:
 
 ```
 /sync-docs
@@ -82,43 +82,44 @@ This scans your dependencies and creates agents like:
 
 ### Base Agents
 
-These are always available:
+Always available after setup:
 
-- `@codebase-locator` - Find WHERE code lives
-- `@codebase-analyzer` - Understand HOW code works
-- `@codebase-pattern-finder` - Find EXAMPLES in the codebase
-- `@web-search-researcher` - Research topics not in Context7
+| Agent | Purpose |
+|-------|---------|
+| `@codebase-locator` | Find WHERE code lives |
+| `@codebase-analyzer` | Understand HOW code works |
+| `@codebase-pattern-finder` | Find EXAMPLES in the codebase |
+| `@web-search-researcher` | Research topics not in Context7 |
 
 ## CLI Options
 
 ```
-Usage: sync-docs [options]
+Usage: claude-docs [options]
 
 Options:
-  -V, --version  output the version number
-  -g, --global   Install to ~/.claude/ instead of project
-  --skip-key     Skip API key prompt
-  -h, --help     display help for command
+  -V, --version   output the version number
+  -g, --global    Install to ~/.claude/ instead of project
+  --skip-mcp      Skip Context7 MCP configuration
+  -h, --help      display help for command
 ```
 
 ## How It Works
 
-1. `npx sync-docs` scaffolds the Claude Code configuration:
-   - Creates `.claude/commands/sync-docs.md` (slash command)
-   - Creates `.claude/commands/research.md` (router)
-   - Creates base agent templates in `.claude/agents/`
+### Step 1: `npx claude-docs`
 
-2. `/sync-docs` (in Claude Code) generates library agents:
-   - Reads `package.json` / `requirements.txt`
-   - Validates each library against Context7
-   - Creates `@research-{library}` agents with Context7 patterns
-   - Updates `/research` router with agent list
+- Prompts for Context7 API key (optional)
+- Runs `claude mcp add` to configure Context7 MCP server
+- Creates `.claude/commands/sync-docs.md` and `research.md`
+- Creates base agent templates in `.claude/agents/`
 
-3. Library agents query Context7 for accurate, up-to-date documentation
+### Step 2: `/sync-docs` in Claude Code
 
-## Context7 Integration
+- Reads `package.json` / `requirements.txt`
+- Queries Context7 to validate each library
+- Creates `@research-{library}` agents with Context7 search patterns
+- Updates `/research` router with agent list
 
-Library agents use Context7 to provide accurate documentation:
+### Step 3: Library agents query Context7
 
 ```typescript
 // How agents query Context7
@@ -129,23 +130,52 @@ context7.getDocs("/facebook/react", {
 })
 ```
 
-**Without Context7 MCP:** The `/sync-docs` command will fail gracefully and explain how to configure Context7.
+## Context7 API Key
 
-**Libraries not in Context7:** Logged clearly and skipped. Use `@web-search-researcher` for manual research.
+An API key is **optional** but increases rate limits.
+
+**Get one free:** [context7.com/dashboard](https://context7.com/dashboard)
+
+The key is stored in `.mcp.json` as a header for the Context7 MCP server:
+
+```json
+{
+  "mcpServers": {
+    "context7": {
+      "type": "http",
+      "url": "https://mcp.context7.com/mcp",
+      "headers": {
+        "CONTEXT7_API_KEY": "your-key"
+      }
+    }
+  }
+}
+```
 
 ## Troubleshooting
 
-### "Context7 MCP server not configured"
+### Context7 MCP not configured
 
-The `/sync-docs` command requires Context7 MCP. See [Context7 setup](https://github.com/upstash/context7).
+If you skipped MCP setup or it failed, configure manually:
 
-### "Library not found in Context7"
+```bash
+claude mcp add --transport http --scope project context7 https://mcp.context7.com/mcp
+```
 
-Not all libraries have Context7 coverage. The agent will be skipped. Use `@web-search-researcher` instead.
+With API key:
+```bash
+claude mcp add --transport http --scope project context7 https://mcp.context7.com/mcp \
+  --header "CONTEXT7_API_KEY: your-key"
+```
+
+### Library not found in Context7
+
+Not all libraries have Context7 coverage. The agent will be skipped.
+Use `@web-search-researcher` for libraries not in Context7.
 
 ### Rate limiting
 
-Add `CONTEXT7_API_KEY` to your `.env` file for higher rate limits.
+Get a free API key at [context7.com/dashboard](https://context7.com/dashboard).
 
 ## License
 
