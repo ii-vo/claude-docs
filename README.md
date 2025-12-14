@@ -5,19 +5,14 @@
 
 Claude Code research workflow tool that auto-configures library-specific sub-agents via [Context7](https://context7.com).
 
-**Requirements:** [Claude Code](https://claude.ai/code) CLI installed (`npm install -g @anthropic-ai/claude-code`)
+**Requirements:** [Claude Code](https://claude.ai/code) CLI installed
 
 ## Quick Start
 
 ```bash
-# 1. Run setup (auto-configures Context7 MCP)
+cd your-project
 npx claude-docs
-
-# 2. In Claude Code, generate library agents
-/sync-docs
-
-# 3. Research any library
-@research-react "explain useState hooks"
+claude /sync-docs
 ```
 
 ## What It Does
@@ -28,14 +23,12 @@ npx claude-docs
 2. **Installs** slash commands (`/sync-docs`, `/research`)
 3. **Creates** base research agents for codebase exploration
 
-Then `/sync-docs` in Claude Code:
+Then `claude /sync-docs`:
 - Scans `package.json` / `requirements.txt` for dependencies
 - Validates each library against Context7
 - Generates `@research-{library}` agents with Context7 patterns
 
 ## Installation
-
-### Project-level (recommended)
 
 ```bash
 cd your-project
@@ -50,22 +43,14 @@ This creates:
 - `.claude/commands/` - `/sync-docs` and `/research` commands
 - `.claude/agents/` - Base research agents
 
-### Global installation
-
-```bash
-npx claude-docs --global
-```
-
-Installs to `~/.claude/` for use across all projects.
-
 ## Usage
 
 ### Generate Library Agents
 
-After setup, run in Claude Code:
+After setup, run:
 
-```
-/sync-docs
+```bash
+claude /sync-docs
 ```
 
 This scans your dependencies and creates agents like:
@@ -103,7 +88,6 @@ Usage: claude-docs [options]
 
 Options:
   -V, --version   output the version number
-  -g, --global    Install to ~/.claude/ instead of project
   --skip-mcp      Skip Context7 MCP configuration
   -h, --help      display help for command
 ```
@@ -117,23 +101,12 @@ Options:
 - Creates `.claude/commands/sync-docs.md` and `research.md`
 - Creates base agent templates in `.claude/agents/`
 
-### Step 2: `/sync-docs` in Claude Code
+### Step 2: `claude /sync-docs`
 
 - Reads `package.json` / `requirements.txt`
 - Queries Context7 to validate each library
 - Creates `@research-{library}` agents with Context7 search patterns
 - Updates `/research` router with agent list
-
-### Step 3: Library agents query Context7
-
-```typescript
-// How agents query Context7
-context7.getDocs("/facebook/react", {
-  mode: "code",
-  topic: "hooks",
-  limit: 10
-})
-```
 
 ## Context7 API Key
 
@@ -141,21 +114,7 @@ An API key is **optional** but increases rate limits.
 
 **Get one free:** [context7.com/dashboard](https://context7.com/dashboard)
 
-The key is stored in `.mcp.json` as a header for the Context7 MCP server:
-
-```json
-{
-  "mcpServers": {
-    "context7": {
-      "type": "http",
-      "url": "https://mcp.context7.com/mcp",
-      "headers": {
-        "CONTEXT7_API_KEY": "your-key"
-      }
-    }
-  }
-}
-```
+The key is stored in `.mcp.json` as a header for the Context7 MCP server.
 
 ## Troubleshooting
 

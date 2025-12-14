@@ -1,6 +1,6 @@
 {
   "name": "claude-docs",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Claude Code research workflow tool that auto-configures library-specific sub-agents via Context7",
   "type": "module",
   "bin": {

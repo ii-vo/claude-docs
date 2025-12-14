@@ -15,16 +15,7 @@ const TEMPLATES_DIR = path.join(__dirname, '..', 'templates');
 const CONTEXT7_MCP_URL = 'https://mcp.context7.com/mcp';
 
 interface ScaffoldOptions {
-  global?: boolean;
   skipMcp?: boolean;
-}
-
-function getTargetDir(options: ScaffoldOptions): string {
-  if (options.global) {
-    const homeDir = process.env.HOME || process.env.USERPROFILE || '';
-    return path.join(homeDir, '.claude');
-  }
-  return path.join(process.cwd(), '.claude');
 }
 
 function ensureDir(dirPath: string): void {
@@ -48,7 +39,7 @@ async function promptForApiKey(): Promise<string | null> {
   return response.apiKey || null;
 }
 
-function configureContext7Mcp(apiKey: string | null, scope: 'project' | 'user'): { success: boolean; error?: string } {
+function configureContext7Mcp(apiKey: string | null): { success: boolean; error?: string } {
   // Clean the API key (remove whitespace/newlines)
   const cleanKey = apiKey?.trim() || null;
 
@@ -56,7 +47,7 @@ function configureContext7Mcp(apiKey: string | null, scope: 'project' | 'user'):
   const args = [
     'mcp', 'add',
     '--transport', 'http',
-    '--scope', scope,
+    '--scope', 'project',
     'context7',
     CONTEXT7_MCP_URL,
   ];
@@ -74,7 +65,7 @@ function configureContext7Mcp(apiKey: string | null, scope: 'project' | 'user'):
   }
 
   // MCP might already exist, try to remove and re-add
-  const removeResult = spawnSync('claude', ['mcp', 'remove', '--scope', scope, 'context7'], {
+  const removeResult = spawnSync('claude', ['mcp', 'remove', '--scope', 'project', 'context7'], {
     stdio: 'pipe',
     encoding: 'utf-8'
   });
@@ -93,10 +84,9 @@ function configureContext7Mcp(apiKey: string | null, scope: 'project' | 'user'):
 }
 
 async function scaffold(options: ScaffoldOptions): Promise<void> {
-  const targetDir = getTargetDir(options);
+  const targetDir = path.join(process.cwd(), '.claude');
   const commandsDir = path.join(targetDir, 'commands');
   const agentsDir = path.join(targetDir, 'agents');
-  const scope = options.global ? 'user' : 'project';
 
   console.log('\nclaude-docs - Claude Code Research Workflow\n');
 
@@ -105,10 +95,10 @@ async function scaffold(options: ScaffoldOptions): Promise<void> {
     const apiKey = await promptForApiKey();
 
     console.log('[...] Configuring Context7 MCP server...');
-    const result = configureContext7Mcp(apiKey, scope);
+    const result = configureContext7Mcp(apiKey);
 
     if (result.success) {
-      console.log(`[ok] Context7 MCP configured (${scope} scope)${apiKey?.trim() ? ' with API key' : ''}`);
+      console.log(`[ok] Context7 MCP configured${apiKey?.trim() ? ' with API key' : ''}`);
     } else {
       console.log('[warn] Could not configure Context7 MCP automatically');
       if (result.error) {
@@ -156,8 +146,7 @@ async function scaffold(options: ScaffoldOptions): Promise<void> {
     }
   }
 
-  console.log('\nSetup complete!\n');
-  console.log('Next step: Run /sync-docs in Claude Code to generate library agents\n');
+  console.log('\nDone! Now run: claude /sync-docs\n');
 }
 
 // CLI setup
@@ -166,8 +155,7 @@ const program = new Command();
 program
   .name('claude-docs')
   .description('Claude Code research workflow tool - auto-configures library-specific sub-agents via Context7')
-  .version('1.0.3')
-  .option('-g, --global', 'Install to ~/.claude/ instead of project')
+  .version('1.0.4')
   .option('--skip-mcp', 'Skip Context7 MCP configuration')
   .action(async (options: ScaffoldOptions) => {
     try {
