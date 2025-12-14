@@ -157,7 +157,7 @@ async function scaffold(options: ScaffoldOptions): Promise<void> {
   }
 
   console.log('\nSetup complete!\n');
-  console.log('Next: Run /sync-docs in Claude Code to generate library agents\n');
+  console.log('--> Run to generate library agents:\n   claude /sync-docs\n');
 }
 
 // CLI setup
