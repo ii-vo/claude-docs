@@ -40,22 +40,81 @@ Found package.json with N dependencies
 Found requirements.txt with M packages
 ```
 
-### Step 2: Validate Libraries with Context7
+### Step 2: Resolve Libraries with Context7 (Smart Matching)
 
-For each detected library, use the `resolve-library-id` MCP tool:
+For each detected library, use smart matching to find the correct Context7 library:
+
+#### 2a. Try Multiple Search Variations
+
+For ambiguous package names, try multiple variations:
+
+| Package Name | Search Variations to Try |
+|--------------|-------------------------|
+| `next` | `"next.js"`, `"nextjs"`, `"vercel next"` |
+| `react` | `"react"`, `"facebook react"` |
+| `vue` | `"vue.js"`, `"vuejs"` |
+| `express` | `"express.js"`, `"expressjs"` |
+| `nuxt` | `"nuxt.js"`, `"nuxtjs"` |
+| `svelte` | `"svelte"`, `"sveltejs"` |
+| `angular` | `"angular"`, `"angular.io"` |
+
+**Example:**
+```
+Call: resolve-library-id({ libraryName: "next.js" })
+```
+
+#### 2b. Handle Multiple Matches (Disambiguation)
+
+When `resolve-library-id` returns **multiple results**, you MUST:
+
+1. **List all matches** to the user with descriptions
+2. **Ask user to select** the correct one
+3. **Never auto-select** the first result for ambiguous queries
+
+**Output format when multiple matches found:**
+```
+Multiple libraries found for "next":
+
+  1. /vercel/next.js - The React Framework (9,372 snippets)
+  2. /amannn/next-intl - Internationalization for Next.js (1,234 snippets)
+  3. /next-auth/next-auth - Authentication for Next.js (567 snippets)
+
+Which library did you mean? Enter number (1-3) or 'skip':
+```
+
+**Wait for user input before proceeding.**
+
+#### 2c. Validate the Match
+
+After selecting a library, **validate it matches the expected framework**:
+
+1. Check the library **description** contains expected keywords
+2. Check the library **ID path** makes sense (e.g., `/vercel/next.js` for Next.js framework)
+3. If validation fails, warn the user:
 
 ```
-Call: resolve-library-id({ libraryName: "react" })
+Warning: Selected library "/amannn/next-intl" appears to be an i18n plugin,
+not the Next.js framework itself.
+
+Continue anyway? (yes/no/search again):
 ```
 
-If the tool returns a valid Context7 library ID (e.g., `/facebook/react`), the library is available.
-If it returns an error or empty result, skip the library.
+**Validation rules:**
+
+| Package | Expected in Description | Red Flags |
+|---------|------------------------|-----------|
+| `next` | "React Framework", "Vercel" | "intl", "i18n", "auth" only |
+| `react` | "UI library", "Facebook" | "native" only, "router" only |
+| `vue` | "Progressive Framework" | "router" only, "cli" only |
+| `express` | "web framework", "Node.js" | "validator" only |
 
 **Output:**
 ```
 Validating with Context7...
-✓ react → /facebook/react
-✓ stripe → /stripe/stripe-node
+✓ react → /facebook/react (validated: UI library)
+✓ next → /vercel/next.js (validated: React Framework)
+? stripe → Multiple matches found (asking user...)
+  → User selected: /stripe/stripe-node
 ✗ internal-lib - Not found in Context7 (skipping)
 ```
 
@@ -226,3 +285,4 @@ Re-run /sync-docs to continue.
 - Does NOT create agents for libraries not in Context7
 - Does NOT modify base agents (codebase-locator, etc.)
 - Does NOT remove existing library agents
+- Does NOT auto-select from ambiguous matches without user confirmation
