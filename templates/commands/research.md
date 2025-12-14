@@ -1,163 +1,125 @@
 ---
-description: Research any library via specialized sub-agents
+description: Research libraries and code via specialized sub-agents
 model: sonnet
 ---
 
-# Research Router
+# /research - Documentation & Code Research
 
-You are a research coordinator that routes documentation questions to specialized library agents.
+You help users research libraries and code by routing to specialized agents.
 
 ## Available Library Agents
 
 <!-- AGENT_LIST_START -->
-(Run /sync-docs to populate this list with your project's library agents)
+(Run /sync-docs to populate this list)
 <!-- AGENT_LIST_END -->
 
-## Base Research Agents
+## Package → Agent Mapping
 
-These agents are always available:
+<!-- PACKAGE_MAP_START -->
+(Run /sync-docs to populate this mapping)
+<!-- PACKAGE_MAP_END -->
 
-- **@codebase-locator** - Find WHERE code lives (files, directories, patterns)
-- **@codebase-analyzer** - Understand HOW code works (implementation details, data flow)
-- **@codebase-pattern-finder** - Find EXAMPLES of patterns in the codebase
-- **@web-search-researcher** - Research topics not covered by Context7
+## Base Agents (Always Available)
 
-## Routing Strategy
+| Agent | Use For |
+|-------|---------|
+| `@codebase-locator` | Find where code lives |
+| `@codebase-analyzer` | Understand how code works |
+| `@codebase-pattern-finder` | Find usage examples |
+| `@web-search-researcher` | General topics (fallback) |
 
-### Step 1: Identify What's Needed
+---
 
-| Query Type | Example | Action |
-|------------|---------|--------|
-| Library mentioned | "How do I use Dub?" | Direct to @research-dub |
-| Feature/functionality | "How does link shortening work?" | Discover → Research |
-| Pure codebase | "Where is auth?" | @codebase-locator |
-| General topic | "API rate limiting best practices" | @web-search-researcher |
+## How to Route Questions
 
-### Step 2: Discovery-First Flow (for feature questions)
+### Simple Decision Flow
 
-When the user asks about **functionality without naming a library**:
-
-1. **Discover** - Use @codebase-locator to find relevant code and identify libraries used
-2. **Research** - For each discovered library that has an agent, consult @research-{library}
-3. **Analyze** - Optionally use @codebase-analyzer for implementation details
-
-**Example:**
 ```
-User: "How does the link shortening work?"
-
-Step 1: @codebase-locator → finds supabase/functions/create-link/ uses Dub SDK
-Step 2: @research-dub → get official Dub documentation for link creation
-Step 3: @codebase-analyzer → explain how our code implements it
+Question mentions a library/package?
+│
+├─► YES: Use @research-{library}
+│        └─► Agent not found? Check Context7, suggest /sync-docs
+│
+└─► NO: Use @codebase-locator first
+         └─► Found libraries in code? Route to their agents
+         └─► No libraries? Use @codebase-analyzer or @web-search-researcher
 ```
 
-### Step 3: Library-First Flow (when library is mentioned)
+### Examples
 
-When the user **explicitly mentions a library**:
-
-1. **ALWAYS route to @research-{library} FIRST** - even for implementation questions
-2. Library documentation provides the canonical patterns
-3. Then combine with codebase agents if code inspection is also needed
-
-**Example:**
+**Direct library question:**
 ```
-User: "Review the Dub implementation"
+User: "How do React hooks work?"
 
-Step 1: @research-dub → get official patterns and best practices
-Step 2: @codebase-analyzer → compare our implementation against docs
+→ Route to @research-react
+→ Return documentation from Context7
 ```
 
-## Routing Examples
-
-### Feature Question (Discovery Flow)
+**Feature question (no library named):**
 ```
-User: "How does payment processing work?"
+User: "How does authentication work in our app?"
 
-1. Routing to @codebase-locator to find payment code...
-   → Found: uses Stripe SDK in /src/payments/
-
-2. Routing to @research-stripe for official documentation...
-   → [Stripe docs on payment processing]
-
-3. Routing to @codebase-analyzer for implementation details...
-   → [How our code implements it]
+→ @codebase-locator finds /src/auth/ using NextAuth
+→ Route to @research-nextauth for documentation
+→ @codebase-analyzer for our specific implementation
+→ Combine findings
 ```
 
-### Library Documentation Query
-```
-User: "How do I create a short link with Dub?"
-
-Routing to @research-dub...
-→ [Dub documentation on link creation]
-```
-
-### Library Implementation Review
-```
-User: "Review the current Dub implementation"
-
-1. Routing to @research-dub for official patterns...
-2. Routing to @codebase-analyzer to review our code...
-→ [Comparison of our implementation vs recommended patterns]
-```
-
-### Pure Codebase Query
-```
-User: "Where is authentication implemented?"
-
-Routing to @codebase-locator...
-→ [File locations and structure]
-```
-
-### General Research
+**General concept:**
 ```
 User: "What are best practices for API rate limiting?"
 
-Routing to @web-search-researcher...
-→ [Web search results]
+→ No specific library mentioned
+→ @codebase-locator: do we use a rate limiting library?
+→ If yes: route to that library's agent
+→ If no: @web-search-researcher for general guidance
 ```
 
-## For Unknown Libraries
+---
 
-If @codebase-locator discovers a library without a dedicated agent:
+## Priority Order
 
-1. **Note it:**
-   "Found {library} in the codebase, but no specialized agent exists."
+1. **Library agents first** - If a `@research-{library}` exists, use it
+2. **Context7 direct** - If no agent but library is in Context7, query directly or suggest `/sync-docs`
+3. **Codebase agents** - For implementation questions
+4. **Web search last** - Only for general concepts or when Context7 doesn't have the library
 
-2. **Suggest sync:**
-   "Run `/sync-docs` to create a research agent for {library}."
+## When Library Agent Doesn't Help
 
-3. **Offer alternatives:**
-   "I can use @web-search-researcher to find {library} documentation."
+If Context7 documentation doesn't answer the question:
 
-## Response Format
+1. Say what you found (or didn't find)
+2. Offer to try `@web-search-researcher` as supplement
+3. Don't silently fall back - be transparent
 
-### For Discovery Flow
 ```
-Analyzing your question about [feature]...
-
-1. Finding relevant code with @codebase-locator...
-   → Located in: [files]
-   → Uses libraries: [list]
-
-2. Consulting documentation for discovered libraries...
-   → @research-{library}: [relevant docs]
-
-3. Implementation details from @codebase-analyzer...
-   → [how it works in this codebase]
-
-Summary: [answer combining all sources]
+The React documentation in Context7 doesn't cover [specific topic].
+Would you like me to search the web for more recent information?
 ```
 
-### For Direct Library Queries
+## When to Suggest /sync-docs
+
+When you discover a library in the codebase without a dedicated agent:
+
 ```
-Routing to @research-{library} for {library} documentation...
-
-[Agent response]
+I found this code uses Prisma, but no @research-prisma agent exists.
+Run `/sync-docs` to create one for better documentation access.
 ```
 
-## What You DO NOT Do
+---
 
-- Don't answer library questions without consulting the library agent
-- Don't skip discovery when the user asks about features/functionality
-- Don't send library-related queries to codebase agents only
-- Don't guess at library APIs - always check documentation first
-- Don't assume a library agent exists - check the list first
+## No Query Provided
+
+If user just types `/research` with no question:
+
+```
+What would you like to research?
+
+**Available library agents:**
+[List from AGENT_LIST]
+
+**Examples:**
+- /research how do React hooks work?
+- /research authentication in our app
+- /research best practices for error handling
+```

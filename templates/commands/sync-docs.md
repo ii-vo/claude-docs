@@ -221,13 +221,69 @@ Creating agents...
 
 ### Step 6: Update /research Router
 
-Read `.claude/commands/research.md` and update the agent list between the markers:
+Read `.claude/commands/research.md` and update TWO sections:
+
+#### 6a. Update Agent List
+
+Between the `AGENT_LIST` markers:
 
 ```markdown
 <!-- AGENT_LIST_START -->
-- @research-react - React documentation specialist
-- @research-stripe - Stripe documentation specialist
+| Agent | Library | Description |
+|-------|---------|-------------|
+| `@research-react` | React | React documentation expert via Context7 |
+| `@research-stripe` | Stripe | Stripe documentation expert via Context7 |
+| `@research-next` | Next.js | Next.js documentation expert via Context7 |
 <!-- AGENT_LIST_END -->
+```
+
+#### 6b. Update Package Mapping
+
+Between the `PACKAGE_MAP` markers, create a lookup table mapping package names to agents:
+
+```markdown
+<!-- PACKAGE_MAP_START -->
+| Package Name | Agent | Context7 ID |
+|--------------|-------|-------------|
+| `react` | `@research-react` | `/facebook/react` |
+| `react-dom` | `@research-react` | `/facebook/react` |
+| `stripe` | `@research-stripe` | `/stripe/stripe-node` |
+| `next` | `@research-next` | `/vercel/next.js` |
+<!-- PACKAGE_MAP_END -->
+```
+
+**Note:** Multiple packages can map to the same agent (e.g., `react` and `react-dom` both map to `@research-react`).
+
+### Step 6c: Update Library Research Skill
+
+If `.claude/skills/library-research/SKILL.md` exists, update TWO sections:
+
+#### Update Skill Agent List
+
+Between the `SKILL_AGENT_LIST` markers:
+
+```markdown
+<!-- SKILL_AGENT_LIST_START -->
+| Agent | Library | Use For |
+|-------|---------|---------|
+| `@research-react` | React | React hooks, components, state management |
+| `@research-stripe` | Stripe | Payments, webhooks, subscriptions |
+| `@research-next` | Next.js | Routing, SSR, API routes, middleware |
+<!-- SKILL_AGENT_LIST_END -->
+```
+
+#### Update Skill Package Map
+
+Between the `SKILL_PACKAGE_MAP` markers:
+
+```markdown
+<!-- SKILL_PACKAGE_MAP_START -->
+| Package | Agent |
+|---------|-------|
+| `react`, `react-dom` | `@research-react` |
+| `stripe` | `@research-stripe` |
+| `next` | `@research-next` |
+<!-- SKILL_PACKAGE_MAP_END -->
 ```
 
 ### Step 7: Update CLAUDE.md or AGENTS.md

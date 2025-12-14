@@ -32,35 +32,36 @@ function generateDocsSection(): string {
   return `${DOCS_SECTION_START}
 ## Library Documentation via Context7
 
-This project uses [Context7](https://context7.com) MCP server for up-to-date library documentation lookup. The documentation system is configured automatically and provides specialized research agents for your project's dependencies.
+This project uses [Context7](https://context7.com) for up-to-date library documentation. Library-specific research agents are auto-generated for your dependencies.
 
-### How to Use
+### Quick Start
 
-1. **Run \`/sync-docs\`** to scan dependencies and generate library-specific research agents
-2. **Use \`/research <topic>\`** to route questions to the appropriate documentation agent
-3. **Use \`@research-<library>\`** to directly query a specific library's documentation
+1. **Run \`/sync-docs\`** to create agents for your project's libraries
+2. **Ask questions** - the system auto-routes to the right agent:
+   - Library questions → \`@research-{library}\` agents
+   - Codebase questions → \`@codebase-locator\` / \`@codebase-analyzer\`
+   - General topics → \`@web-search-researcher\` (fallback)
 
-### Available Commands
+### How It Works
 
-| Command | Description |
-|---------|-------------|
-| \`/sync-docs\` | Scan dependencies and create/update library research agents |
-| \`/research <query>\` | Route questions to appropriate documentation agents |
+\`\`\`
+Question mentions a library?
+├─► YES: Use @research-{library}
+└─► NO:  Find code first, then route to discovered library agents
+\`\`\`
 
-### Context7 MCP Tools
+### Commands
 
-The Context7 MCP server provides these tools:
-
-| Tool | Purpose |
-|------|---------|
-| \`resolve-library-id\` | Convert package name to Context7 library ID |
-| \`get-library-docs\` | Retrieve documentation for a library |
+| Command | Purpose |
+|---------|---------|
+| \`/sync-docs\` | Scan dependencies, create library agents |
+| \`/research <query>\` | Research libraries or code |
 
 ### Notes
 
-- Documentation agents are generated in \`.claude/agents/research-<library>.md\`
-- Run \`/sync-docs\` after adding new dependencies to create their research agents
-- If a library is not available in Context7, it will be skipped during sync
+- Library agents live in \`.claude/agents/research-{library}.md\`
+- Run \`/sync-docs\` after adding new dependencies
+- Libraries not in Context7 are skipped (web search available as fallback)
 ${DOCS_SECTION_END}`;
 }
 
@@ -194,8 +195,10 @@ async function scaffold(options: ScaffoldOptions): Promise<void> {
   }
 
   // Create directories
+  const skillsDir = path.join(targetDir, 'skills');
   ensureDir(commandsDir);
   ensureDir(agentsDir);
+  ensureDir(skillsDir);
 
   // Copy command templates
   const commandTemplates = ['sync-docs.md', 'research.md'];
@@ -229,6 +232,20 @@ async function scaffold(options: ScaffoldOptions): Promise<void> {
     } else {
       console.error(`[error] Template not found: ${template}`);
     }
+  }
+
+  // Copy skill templates
+  const libraryResearchSkillDir = path.join(skillsDir, 'library-research');
+  ensureDir(libraryResearchSkillDir);
+
+  const skillSrc = path.join(TEMPLATES_DIR, 'skills', 'library-research', 'SKILL.md');
+  const skillDest = path.join(libraryResearchSkillDir, 'SKILL.md');
+
+  if (fs.existsSync(skillSrc)) {
+    copyFile(skillSrc, skillDest);
+    console.log(`[ok] Created ${path.relative(process.cwd(), skillDest)}`);
+  } else {
+    console.error('[error] Skill template not found: library-research/SKILL.md');
   }
 
   // Update CLAUDE.md or AGENTS.md if present
