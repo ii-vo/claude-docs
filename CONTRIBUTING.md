@@ -77,6 +77,17 @@ Currently supports `package.json` and `requirements.txt`. To add new manifest ty
 3. Test with a project using that manifest
 4. Submit a PR with test cases
 
+## Testing
+
+```bash
+npm test            # Run automated tests
+npm run test:manual # Run tests, keep directory for manual Claude testing
+```
+
+Tests run on macOS and Linux. Windows users can run `npm run build` and `npm run typecheck` but the bash test script won't work.
+
+See `tests/manual-scenarios.md` for testing agent behavior in Claude Code.
+
 ## Code Style
 
 - TypeScript with strict mode

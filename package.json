@@ -1,6 +1,6 @@
 {
   "name": "claude-docs",
-  "version": "1.0.4",
+  "version": "1.0.1",
   "description": "Claude Code research workflow tool that auto-configures library-specific sub-agents via Context7",
   "type": "module",
   "bin": {
@@ -14,7 +14,9 @@
     "build": "tsc",
     "dev": "tsx src/index.ts",
     "typecheck": "tsc --noEmit",
-    "prepublishOnly": "npm run build"
+    "prepublishOnly": "npm run build",
+    "test": "./test.sh",
+    "test:manual": "./test.sh --keep"
   },
   "repository": {
     "type": "git",
