@@ -1,6 +1,10 @@
-# Implementation Plan: sync-docs
+# Implementation Plan: claude-docs
 
 Execution checklist derived from PRD_SYNC_DOCS.md. Complete in order.
+
+**Package:** `claude-docs`
+**CLI command:** `claude-docs` or `npx claude-docs`
+**Slash command:** `/sync-docs` (inside Claude Code)
 
 ---
 
@@ -9,18 +13,18 @@ Execution checklist derived from PRD_SYNC_DOCS.md. Complete in order.
 ### 1.1 Initialize New Package
 
 ```bash
-mkdir sync-docs && cd sync-docs
+cd sync-docs  # Directory name (package is "claude-docs")
 npm init -y
 ```
 
 - [x] Create `package.json` with:
   ```json
   {
-    "name": "sync-docs",
+    "name": "claude-docs",
     "version": "1.0.0",
-    "bin": { "sync-docs": "./bin/cli.js" },
+    "bin": { "claude-docs": "dist/index.js" },
     "type": "module",
-    "files": ["bin/", "templates/", "dist/"]
+    "files": ["templates/", "dist/"]
   }
   ```
 - [x] Add dependencies: `commander`, `prompts`, `dotenv`
@@ -30,22 +34,22 @@ npm init -y
 ### 1.2 Directory Structure
 
 ```
-sync-docs/
-├── bin/
-│   └── cli.js              # npx entry point (compiled)
+sync-docs/                        # Directory name (package is "claude-docs")
+├── dist/
+│   └── index.js                  # Compiled CLI entry (has shebang)
 ├── src/
-│   └── index.ts            # CLI source
+│   └── index.ts                  # CLI source
 ├── templates/
 │   ├── commands/
-│   │   ├── sync-docs.md    # /sync-docs slash command
-│   │   └── research.md     # /research router
+│   │   ├── sync-docs.md          # /sync-docs slash command
+│   │   └── research.md           # /research router
 │   └── agents/
 │       ├── codebase-locator.md
 │       ├── codebase-analyzer.md
 │       ├── codebase-pattern-finder.md
 │       ├── web-search-researcher.md
-│       └── research-library.md.hbs  # Library agent template
-├── package.json
+│       └── research-library.md.hbs
+├── package.json                  # name: "claude-docs"
 ├── tsconfig.json
 └── README.md
 ```
@@ -55,26 +59,28 @@ sync-docs/
 
 ---
 
-## Phase 2: CLI Implementation (`npx sync-docs`)
+## Phase 2: CLI Implementation (`npx claude-docs`)
 
 ### 2.1 Entry Point (`src/index.ts`)
 
 - [x] Parse CLI arguments with Commander:
   - `--global, -g` → install to `~/.claude/`
-  - `--skip-key` → skip API key prompt
+  - `--skip-mcp` → skip Context7 MCP configuration
   - `--help, -h` → show help
 - [x] Determine target directory:
   - Default: `process.cwd()/.claude/`
   - Global: `~/.claude/`
 
-### 2.2 API Key Prompt
+### 2.2 Context7 MCP Configuration
 
-- [x] Prompt: "Enter Context7 API Key (optional, press Enter to skip):"
-- [x] If provided, write to `.env`:
+- [x] Prompt: "Context7 API Key (optional, increases rate limits):"
+- [x] Run `claude mcp add` to configure Context7 MCP server:
+  ```bash
+  claude mcp add --transport http --scope project context7 https://mcp.context7.com/mcp
+  # With API key:
+  claude mcp add --transport http --scope project context7 https://mcp.context7.com/mcp --header "CONTEXT7_API_KEY: <key>"
   ```
-  CONTEXT7_API_KEY=<key>
-  ```
-- [x] If `--skip-key`, skip prompt
+- [x] If `--skip-mcp`, skip MCP configuration
 
 ### 2.3 File Scaffolding
 
@@ -100,9 +106,9 @@ sync-docs/
 
 ### 2.5 Build & Test
 
-- [x] Compile TypeScript to `bin/cli.js`
-- [x] Test locally: `node bin/cli.js`
-- [x] Test via npx: `npm link && npx sync-docs`
+- [x] Compile TypeScript to `dist/index.js`
+- [x] Test locally: `node dist/index.js`
+- [x] Test via npx: `npm link && claude-docs`
 
 ---
 
@@ -277,7 +283,7 @@ model: sonnet
   }
   ```
 
-- [x] Run `npx sync-docs`
+- [x] Run `npx claude-docs` (or `claude-docs` if linked)
 - [x] Verify files created in `.claude/`
 - [x] Open Claude Code, run `/sync-docs`
 - [x] Verify:
@@ -332,7 +338,7 @@ model: sonnet
 
 ### 6.1 Final Checklist
 
-- [x] `npx sync-docs` works in fresh project
+- [x] `npx claude-docs` works in fresh project
 - [ ] `/sync-docs` generates library agents (REQUIRES Context7 MCP)
 - [ ] `@research-{lib}` queries Context7 (REQUIRES Context7 MCP)
 - [ ] `/research` routes correctly (REQUIRES Context7 MCP)
@@ -363,12 +369,12 @@ Not now. Later.
 
 ## File Checklist
 
-### To Create (from scratch):
+### Package Structure (in sync-docs/ directory):
 
 ```
-sync-docs/
-├── bin/cli.js
-├── src/index.ts
+sync-docs/                              # Directory (package name is "claude-docs")
+├── dist/index.js                       # Compiled CLI with shebang
+├── src/index.ts                        # CLI source
 ├── templates/commands/sync-docs.md
 ├── templates/commands/research.md
 ├── templates/agents/codebase-locator.md
@@ -376,7 +382,7 @@ sync-docs/
 ├── templates/agents/codebase-pattern-finder.md
 ├── templates/agents/web-search-researcher.md
 ├── templates/agents/research-library.md.hbs
-├── package.json
+├── package.json                        # name: "claude-docs"
 ├── tsconfig.json
 ├── README.md
 └── CONTRIBUTING.md

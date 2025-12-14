@@ -1,4 +1,4 @@
-# Contributing to sync-docs
+# Contributing to claude-docs
 
 Thank you for your interest in contributing!
 
@@ -6,8 +6,8 @@ Thank you for your interest in contributing!
 
 ```bash
 # Clone the repository
-git clone https://github.com/your-org/sync-docs.git
-cd sync-docs
+git clone https://github.com/your-org/claude-docs.git
+cd claude-docs/sync-docs
 
 # Install dependencies
 npm install
@@ -20,27 +20,31 @@ npm link
 
 # Test in a project
 cd /path/to/test-project
-sync-docs --skip-key
+claude-docs --skip-mcp
 ```
 
 ## Project Structure
 
 ```
-sync-docs/
-├── bin/cli.js                 # npx entry point
-├── src/index.ts               # CLI source
-├── templates/
-│   ├── commands/
-│   │   ├── sync-docs.md       # /sync-docs slash command
-│   │   └── research.md        # /research router
-│   └── agents/
-│       ├── codebase-locator.md
-│       ├── codebase-analyzer.md
-│       ├── codebase-pattern-finder.md
-│       ├── web-search-researcher.md
-│       └── research-library.md.hbs  # Library agent template
-├── package.json
-└── tsconfig.json
+claude-docs/
+├── sync-docs/                   # Main package (npm: claude-docs)
+│   ├── dist/index.js            # Compiled CLI entry point
+│   ├── src/index.ts             # CLI source
+│   ├── templates/
+│   │   ├── commands/
+│   │   │   ├── sync-docs.md     # /sync-docs slash command
+│   │   │   └── research.md      # /research router
+│   │   └── agents/
+│   │       ├── codebase-locator.md
+│   │       ├── codebase-analyzer.md
+│   │       ├── codebase-pattern-finder.md
+│   │       ├── web-search-researcher.md
+│   │       └── research-library.md.hbs
+│   ├── package.json
+│   └── tsconfig.json
+├── PRD_SYNC_DOCS.md             # Product requirements
+├── IMPLEMENTATION_PLAN.md       # Implementation checklist
+└── CLAUDE.md                    # Claude Code instructions
 ```
 
 ## How to Contribute

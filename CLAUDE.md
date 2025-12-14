@@ -4,100 +4,78 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-**sync-docs** - A Claude Code research workflow tool that auto-configures library-specific sub-agents via Context7. Scans project dependencies, validates documentation availability, and generates optimized research agents.
+**claude-docs** - A Claude Code research workflow tool that auto-configures library-specific sub-agents via Context7. Scans project dependencies, validates documentation availability, and generates optimized research agents.
 
-**Status:** In development (see PRD_SYNC_DOCS.md and IMPLEMENTATION_PLAN.md)
+**npm package:** `claude-docs`
+**CLI command:** `claude-docs` or `npx claude-docs`
+**Slash command:** `/sync-docs` (runs inside Claude Code)
 
-## Commands
+## Quick Start
 
 ```bash
-# Current (legacy CLI - being deprecated)
-npm run dev -- search "query"     # Search library docs
-npm run dev -- get-docs "id"      # Get specific docs
-npm run typecheck                 # Type check
-npm run build                     # Compile to dist/
+# From the sync-docs/ directory
+cd sync-docs
+npm install
+npm run build
+npm link
 
-# Target (sync-docs MVP)
-npx sync-docs                     # Scaffold .claude/ directory
-# Then in Claude Code: /sync-docs to generate library agents
+# Test in any project
+cd /path/to/your-project
+claude-docs              # Scaffolds .claude/ and configures Context7 MCP
+# Then in Claude Code:
+/sync-docs               # Generates library agents from dependencies
 ```
 
-No test or lint commands configured.
-
-## Architecture
-
-### Current State (Legacy)
+## Repository Structure
 
 ```
-src/
-├── index.ts                 # CLI entry (Commander.js)
-├── commands/
-│   ├── search-library.ts    # Search command (deprecated)
-│   ├── get-docs.ts          # Get docs command (deprecated)
-│   └── shared.ts            # Shared command logic
-├── lib/
-│   └── context7-sdk.ts      # Context7 SDK wrapper
-├── utils/
-│   ├── file-operations.ts   # Markdown formatting, file I/O
-│   └── prompt.ts            # User prompts
-└── config/
-    └── context7-config.ts   # Environment config
+claude-docs/                     # Repository root
+├── sync-docs/                   # Main package (npm: claude-docs)
+│   ├── dist/index.js            # Compiled CLI (has shebang)
+│   ├── src/index.ts             # CLI source
+│   ├── templates/
+│   │   ├── commands/
+│   │   │   ├── sync-docs.md     # /sync-docs slash command
+│   │   │   └── research.md      # /research router
+│   │   └── agents/              # Base agent templates
+│   ├── package.json             # name: "claude-docs"
+│   └── README.md                # User-facing documentation
+├── PRD_SYNC_DOCS.md             # Product requirements
+├── IMPLEMENTATION_PLAN.md       # Implementation checklist
+└── CLAUDE.md                    # This file
 ```
 
-### Target State (sync-docs)
+### Legacy Code (root level, being deprecated)
+
+The root-level `src/`, `dist/`, and `package.json` contain a deprecated CLI approach. The active code is in `sync-docs/`.
+
+## CLI Options
 
 ```
-sync-docs/
-├── bin/cli.js               # npx entry point
-├── src/index.ts             # CLI logic
-├── templates/
-│   ├── commands/
-│   │   ├── sync-docs.md     # /sync-docs slash command
-│   │   └── research.md      # /research router
-│   └── agents/              # Base agent templates
-└── package.json
+Usage: claude-docs [options]
+
+Options:
+  -V, --version   output the version number
+  -g, --global    Install to ~/.claude/ instead of project
+  --skip-mcp      Skip Context7 MCP configuration
+  -h, --help      display help for command
 ```
 
-### Key Files
+## Development Commands
 
-- `PRD_SYNC_DOCS.md` - Full product requirements
-- `IMPLEMENTATION_PLAN.md` - Phased task breakdown
-- `templates/*.md` - Base agent prompts (codebase-locator, codebase-analyzer, codebase-pattern-finder, web-search-researcher)
-- `src/lib/context7-sdk.ts` - Context7 SDK wrapper (reusable)
+```bash
+# In sync-docs/ directory
+npm run build        # Compile TypeScript to dist/
+npm run dev          # Run with tsx (development)
+npm run typecheck    # Type check without emitting
+```
 
 ## Technology
 
 - TypeScript 5.6, ES2022 target, ESNext modules
 - Node.js 22+ required
-- Dependencies: commander, prompts, dotenv, @upstash/context7-sdk
+- Dependencies: commander, prompts, dotenv
 - Dev: tsx for execution
-
-## Environment
-
-```bash
-# .env
-CONTEXT7_API_KEY=your_key      # Optional, increases rate limits
-OUTPUT_DIR=./output            # Legacy CLI only
-```
-
-## Context7 SDK Usage
-
-```typescript
-import { Context7 } from '@upstash/context7-sdk';
-
-const client = new Context7({ apiKey: process.env.CONTEXT7_API_KEY });
-
-// Search for library
-const results = await client.searchLibrary("react");
-
-// Get documentation
-const docs = await client.getDocs("/facebook/react", {
-  mode: "code",    // or "info"
-  format: "json",  // or "txt"
-  limit: 10,
-  topic: "hooks"   // optional filter
-});
-```
 
 ## Critical Constraints
 

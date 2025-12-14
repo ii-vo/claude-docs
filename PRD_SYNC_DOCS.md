@@ -1,17 +1,20 @@
 # Product Requirements Document
-## sync-docs: Claude Code Research Workflow
+## claude-docs: Claude Code Research Workflow
 
 **Version:** 2.0
 **Date:** 2025-12-14
 **Status:** Draft
 **License:** Open Source (MIT)
+**npm package:** `claude-docs`
+**CLI command:** `claude-docs` or `npx claude-docs`
+**Slash command:** `/sync-docs` (runs inside Claude Code)
 **Supersedes:** MVP_PRD.md (deprecated)
 
 ---
 
 ## 1. Executive Summary
 
-`sync-docs` is a Claude Code research workflow tool that automatically configures library-specific sub-agents powered by Context7. It scans project dependencies, validates documentation availability, and generates optimized research agents that provide accurate, up-to-date library context during development.
+`claude-docs` is a Claude Code research workflow tool that automatically configures library-specific sub-agents powered by Context7. It scans project dependencies, validates documentation availability, and generates optimized research agents that provide accurate, up-to-date library context during development.
 
 **Core value proposition:** Developers get specialized AI research assistants for every library in their project, pre-configured with the correct Context7 search patterns and library-specific knowledge.
 
@@ -52,15 +55,18 @@ When developers use Claude Code for assistance:
 
 ```bash
 # User runs npx in their project
-npx sync-docs
+npx claude-docs
 
 # Output:
-# ? Enter Context7 API Key (optional, press Enter to skip): ****
-# ✓ API key saved to .env
-# ✓ Created .claude/commands/sync-docs.md
-# ✓ Created .claude/commands/research.md
+# ? Context7 API Key (optional, increases rate limits): ****
+# [ok] Context7 MCP configured (project scope) with API key
+# [ok] Created .claude/commands/sync-docs.md
+# [ok] Created .claude/commands/research.md
+# [ok] Created .claude/agents/codebase-locator.md
+# ...
 #
-# Next: Run /sync-docs in Claude Code to generate library agents
+# --> Run to generate library agents:
+#    claude /sync-docs
 ```
 
 ### 4.2 Agent Generation
@@ -147,25 +153,27 @@ Sync complete! 2 new agents, 1 updated
 ### 5.1 Component Overview
 
 ```
-sync-docs/
-├── bin/
-│   └── cli.js                    # npx entry point
+sync-docs/                          # Directory name (package is "claude-docs")
+├── dist/
+│   └── index.js                    # Compiled CLI entry (has shebang)
 ├── templates/
-│   ├── sync-docs.md              # /sync-docs slash command
-│   ├── research.md               # /research router command
-│   ├── base-agents/
-│   │   ├── codebase-locator.md
-│   │   ├── codebase-analyzer.md
-│   │   └── codebase-pattern-finder.md
-│   └── library-agent.md.hbs      # Handlebars template for lib agents
+│   ├── commands/
+│   │   ├── sync-docs.md            # /sync-docs slash command
+│   │   └── research.md             # /research router command
+│   └── agents/
+│       ├── codebase-locator.md
+│       ├── codebase-analyzer.md
+│       ├── codebase-pattern-finder.md
+│       ├── web-search-researcher.md
+│       └── research-library.md.hbs # Handlebars template for lib agents
 ├── src/
-│   └── index.ts                  # CLI logic
-└── package.json
+│   └── index.ts                    # CLI source
+└── package.json                    # name: "claude-docs"
 ```
 
 ### 5.2 Generated File Structure
 
-After running `npx sync-docs` and `/sync-docs`:
+After running `npx claude-docs` and `/sync-docs`:
 
 ```
 project/
@@ -456,20 +464,21 @@ Behavior:
 ### 9.1 Package Name
 
 ```
-npx sync-docs
+npx claude-docs
 ```
 
 ### 9.2 Installation Scopes
 
 **Project scope (default):**
 ```bash
-npx sync-docs
+npx claude-docs
 # Creates .claude/ in current directory
+# Configures Context7 MCP server
 ```
 
 **Global scope:**
 ```bash
-npx sync-docs --global
+npx claude-docs --global
 # Creates in ~/.claude/ (user-level commands)
 ```
 
@@ -477,13 +486,12 @@ npx sync-docs --global
 
 ```json
 {
-  "name": "sync-docs",
+  "name": "claude-docs",
   "version": "1.0.0",
   "bin": {
-    "sync-docs": "./bin/cli.js"
+    "claude-docs": "dist/index.js"
   },
   "files": [
-    "bin/",
     "templates/",
     "dist/"
   ]
@@ -494,22 +502,25 @@ npx sync-docs --global
 
 ## 10. CLI Interface
 
-### 10.1 npx sync-docs
+### 10.1 npx claude-docs
 
 ```
-Usage: sync-docs [options]
+Usage: claude-docs [options]
 
 Options:
-  --global, -g     Install to ~/.claude/ instead of project
-  --skip-key       Skip API key prompt
-  --help, -h       Show help
+  -V, --version    output the version number
+  -g, --global     Install to ~/.claude/ instead of project
+  --skip-mcp       Skip Context7 MCP configuration
+  -h, --help       display help for command
 
 Interactive prompts:
-  1. API Key (optional, stored in .env)
+  1. Context7 API Key (optional, increases rate limits)
 
 Output:
+  - Configures Context7 MCP server via `claude mcp add`
   - .claude/commands/sync-docs.md
   - .claude/commands/research.md
+  - .claude/agents/codebase-*.md (base agents)
 ```
 
 ### 10.2 /sync-docs (Claude Code)
@@ -626,7 +637,7 @@ Parse error:
 - [ ] Progress indicators during sync
 
 ### Phase 3: Distribution (Post-MVP)
-- [ ] npm publish as `sync-docs`
+- [ ] npm publish as `claude-docs`
 - [ ] GitHub repository setup
 - [ ] Documentation site (optional)
 - [ ] Demo video
@@ -686,7 +697,7 @@ The following from MVP_PRD.md are deprecated:
 ### 16.1 What's IN the MVP
 
 **Absolutely required for v1.0.0:**
-- `npx sync-docs` CLI that scaffolds `.claude/commands/` and `.claude/agents/`
+- `npx claude-docs` CLI that scaffolds `.claude/commands/` and `.claude/agents/`
 - `/sync-docs` slash command template
 - `/research` router template
 - 4 base agents (codebase-locator, codebase-analyzer, codebase-pattern-finder, web-search-researcher)
@@ -717,7 +728,7 @@ Explicitly deferred:
 ### 16.3 MVP Success Criteria
 
 v1.0.0 ships when:
-1. [ ] `npx sync-docs` works in a fresh project
+1. [ ] `npx claude-docs` works in a fresh project
 2. [ ] Running `/sync-docs` in Claude Code generates agents
 3. [ ] `@research-react` correctly queries Context7 for React docs
 4. [ ] `/research stripe webhooks` routes to `@research-stripe`
